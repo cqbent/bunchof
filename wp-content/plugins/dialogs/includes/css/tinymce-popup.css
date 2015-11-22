@@ -1,0 +1,76 @@
+/* 
+    Document   : style
+    Created on : 31.12.2011, 10:55:00
+    Author     : mahype
+    Description:
+        Styles for tinymce popup window
+*/
+body {
+		height: auto;
+		overflow: hidden;
+		background: #F5F5F5;
+		font-family: sans-serif;
+	}
+	label {
+    	font-size: 12px;
+    	cursor: pointer;
+	}
+	small{
+		font-size: 10px;
+		color: #333;
+	}
+	div{
+		margin-bottom: 10px;
+	}
+	p{
+		font-size: 12px;
+	}
+	input[type="text"], input[type="select"]{
+		background-color: #FFFFFF;
+    	border-color: #DFDFDF;
+    	border-radius: 3px 3px 3px 3px;
+    	border-style: solid;
+    	border-width: 1px;
+	}
+	input[type="button"]{
+    	font-weight: bold;
+    	-moz-box-sizing: content-box;
+	    border-radius: 11px 11px 11px 11px;
+	    border-style: solid;
+	    border-width: 1px;
+	    cursor: pointer;
+	    font-size: 12px !important;
+	    line-height: 13px;
+	    padding: 3px 8px;
+	    text-decoration: none;
+	}
+	.buttons{
+		text-align:right;
+		margin-top:10px;
+	}
+	.primary{
+		background: url("../../../../wp-admin/images/button-grad.png") repeat-x scroll left top #21759B;
+		text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+		border-color: #298CBA;
+		color: #FFFFFF;
+	}
+	.primary:hover{
+		border-color: #13455B;
+		color:#EAF2FA;
+	}
+	.secondary{
+		background: url("../../../../wp-admin/images/white-grad.png") repeat-x scroll left top #F2F2F2;
+   		color: #464646;
+		border-color: #BBBBBB;
+		text-shadow: 0 1px 0 #FFFFFF;
+	}
+	.secondary:hover{
+		border-color: #666;
+		color:#000;
+	}
+	.widefat{
+		border-spacing: 0;
+    	clear: both;
+   		margin: 0;
+    	width: 100%;
+	}

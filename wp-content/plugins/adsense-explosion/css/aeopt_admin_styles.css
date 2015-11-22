@@ -1,0 +1,32 @@
+.ao_type{display:none;}
+
+.ao_explain{font-size:85%;}
+
+option{margin: 0 15px 5px 10px;}
+
+#wpbody {
+    margin: 0px 0px 0 0px;
+    font-size: 13px;
+}
+
+#contenitore div {
+    margin: 5px 5px 5px 5px;
+}
+
+#contenitore div .new {
+    margin: 0px 0px 0px 0px;
+}
+
+#contenitore table {
+    border-collapse: separate;
+    border-spacing: 5px 5px;
+}
+
+#contenitore .table-responsive {
+    border-collapse: collapse;
+    border-spacing: 0px 0px;
+}
+
+.close, .alert-dismissible .close {
+right: -11px;
+}

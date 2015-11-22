@@ -1,0 +1,16 @@
+.privacy{
+	display: inline;
+	margin-left: 20px;
+}
+
+table#xprofile-privacy-settings {
+	width: 70%;
+	margin-bottom: 20px;
+}
+	table#xprofile-privacy-settings th.title {
+		width: 70%;
+	}
+	
+	table#xprofile-privacy-settings .yes, table#profile-privacy-settings .no {
+		width: 60px;
+	}

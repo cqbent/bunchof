@@ -1,0 +1,15 @@
+/* 
+    Document   : style
+    Created on : 22.12.2011, 12:01:42
+    Author     : peterliebetrau
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+#menu-posts-tk-dialogs .wp-menu-image {
+        background: url(../../includes/images/interactions-16.png) no-repeat 6px 6px !important;
+}
+#menu-posts-portfolio:hover .wp-menu-image, #menu-posts-portfolio.wp-has-current-submenu .wp-menu-image {
+        background-position:6px -16px !important;
+}
+#icon-edit.icon32-posts-tk-dialogs { background: url(../../includes/images/interactions-32.png) no-repeat;}
