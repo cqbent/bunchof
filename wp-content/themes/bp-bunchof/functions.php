@@ -196,7 +196,16 @@ function go_home() {
     wp_redirect( home_url() );
     exit();
 }
-
 add_action('wp_logout', 'go_home');
+
+function max_upload_filesize_message() {
+    $maxfilesize = get_option('wpisl_options');
+    $msg = '<div class="msg">The maximum file size for images is '
+        .$maxfilesize['img_upload_limit'].
+    'kb</div>';
+    print $msg;
+}
+add_action('bp_before_group_avatar_creation_step','max_upload_filesize_message')
+
 
 ?>
