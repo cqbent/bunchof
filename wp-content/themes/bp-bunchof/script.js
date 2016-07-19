@@ -21,7 +21,10 @@ jQuery(document).ready(function($) {
     });
     jQuery('#create-group-form').validate({
         rules: {
+            'group-name': "required",
+            'group-desc': "required",
             'group-field-one': {
+                required: true,
                 zipcode: true,
             }
         }

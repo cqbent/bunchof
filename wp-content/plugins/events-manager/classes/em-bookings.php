@@ -25,6 +25,10 @@ class EM_Bookings extends EM_Object implements Iterator{
 	 */
 	var $spaces;
 	/**
+	 * @var boolena Flag for Multilingual functionality, to help prevent unnecessary reloading of this object if already 'translated'
+	 */
+	var $translated;
+	/**
 	 * If flag is true, a registration will be attempted when booking whether the user is logged in or not. Used in cases such as manual bookings (a Pro feature) and should only be enabled during manipulation by an event admin.
 	 * @var unknown
 	 */
@@ -40,7 +44,7 @@ class EM_Bookings extends EM_Object implements Iterator{
 	 * @param EM_Event $event
 	 * @return null
 	 */
-	function EM_Bookings( $data = false ){
+	function __construct( $data = false ){
 		if( is_object($data) && get_class($data) == "EM_Event" ){ //Creates a blank bookings object if needed
 			global $wpdb;
 			$this->event_id = $data->event_id;
@@ -117,7 +121,7 @@ class EM_Bookings extends EM_Object implements Iterator{
 			if($result){
 				$result = $EM_Booking;
 			}
-			$this->feedback_message = sprintf(__('%s created.','dbem'),__('Booking','dbem'));
+			$this->feedback_message = sprintf(__('%s created.','events-manager'),__('Booking','events-manager'));
 		}else{
 			$this->errors = array_merge($this->errors, $EM_Booking->errors);
 		}
@@ -256,9 +260,10 @@ class EM_Bookings extends EM_Object implements Iterator{
 		if( count($booking_ids) > 0 ){
 			//Delete bookings and ticket bookings
 			$result_tickets = $wpdb->query("DELETE FROM ". EM_TICKETS_BOOKINGS_TABLE ." WHERE booking_id IN (".implode(',',$booking_ids).");");
-			$result = $wpdb->query("DELETE FROM ".EM_BOOKINGS_TABLE." WHERE event_id IN (".implode(',',$booking_ids).")");
+			$result = $wpdb->query("DELETE FROM ".EM_BOOKINGS_TABLE." WHERE booking_id IN (".implode(',',$booking_ids).")");
 		}
-		return ($result !== false && $result_tickets !== false);
+		do_action('em_bookings_deleted', $result, $booking_ids);
+		return apply_filters('em_bookings_delete', $result !== false && $result_tickets !== false, $booking_ids, $this);
 	}
 
 	
@@ -304,17 +309,17 @@ class EM_Bookings extends EM_Object implements Iterator{
 			foreach( $booking_ids as $booking_id ){
 				$EM_Booking = em_get_booking($booking_id);
 				if( !$EM_Booking->can_manage() ){
-					$this->feedback_message = __('Bookings %s. Mails Sent.', 'dbem');
+					$this->feedback_message = __('Bookings %s. Mails Sent.', 'events-manager');
 					return false;
 				}
 				$results[] = $EM_Booking->set_status($status);
 			}
 			if( !in_array('false',$results) ){
-				$this->feedback_message = __('Bookings %s. Mails Sent.', 'dbem');
+				$this->feedback_message = __('Bookings %s. Mails Sent.', 'events-manager');
 				return true;
 			}else{
 				//TODO Better error handling needed if some bookings fail approval/failure
-				$this->feedback_message = __('An error occurred.', 'dbem');
+				$this->feedback_message = __('An error occurred.', 'events-manager');
 				return false;
 			}
 		}elseif( is_numeric($booking_ids) || is_object($booking_ids) ){
@@ -525,6 +530,7 @@ class EM_Bookings extends EM_Object implements Iterator{
 		//Get ordering instructions
 		$EM_Booking = em_get_booking();
 		$accepted_fields = $EM_Booking->get_fields(true);
+		$accepted_fields['date'] = 'booking_date';
 		$orderby = self::build_sql_orderby($args, $accepted_fields);
 		//Now, build orderby sql
 		$orderby_sql = ( count($orderby) > 0 ) ? 'ORDER BY '. implode(', ', $orderby) : 'ORDER BY booking_date';
@@ -567,6 +573,8 @@ class EM_Bookings extends EM_Object implements Iterator{
 	
 
 	//List of patients in the patient database, that a user can choose and go on to edit any previous treatment data, or add a new admission.
+	//Deprecated
+	//@todo remove in 6.0
 	function export_csv() {
 		global $EM_Event;
 		if($EM_Event->event_id != $this->event_id ){
@@ -600,7 +608,8 @@ class EM_Bookings extends EM_Object implements Iterator{
 					//we call the segmented JS files and include them here
 					$include_path = dirname(dirname(__FILE__)); //get path to parent directory
 					include($include_path.'/includes/js/bookingsform.js'); 
-					do_action('em_gateway_js'); 
+					do_action('em_gateway_js'); //deprecated use em_booking_js below instead
+					do_action('em_booking_js'); //use this instead
 				?>							
 			});
 			<?php
@@ -625,12 +634,12 @@ class EM_Bookings extends EM_Object implements Iterator{
 		$conditions = apply_filters( 'em_bookings_build_sql_conditions', parent::build_sql_conditions($args), $args );
 		if( is_numeric($args['status']) ){
 			$conditions['status'] = 'booking_status='.$args['status'];
-		}elseif( is_array($args['status']) && count($args['status']) > 0 ){
+		}elseif( self::array_is_numeric($args['status']) && count($args['status']) > 0 ){
 			$conditions['status'] = 'booking_status IN ('.implode(',',$args['status']).')';
 		}elseif( !is_array($args['status']) && preg_match('/^([0-9],?)+$/', $args['status']) ){
 			$conditions['status'] = 'booking_status IN ('.$args['status'].')';
 		}
-		if( is_numeric($args['person']) && current_user_can('manage_others_bookings') ){
+		if( is_numeric($args['person']) ){
 			$conditions['person'] = EM_BOOKINGS_TABLE.'.person_id='.$args['person'];
 		}
 		if( EM_MS_GLOBAL && !empty($args['blog']) && is_numeric($args['blog']) ){

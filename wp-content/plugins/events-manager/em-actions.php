@@ -28,7 +28,7 @@ function em_init_actions() {
 					$result = array('result'=>false, 'error'=>$EM_Ticket->feedback_message);
 				}
 			}else{
-				$result = array('result'=>false, 'error'=>__('No ticket id provided','dbem'));	
+				$result = array('result'=>false, 'error'=>__('No ticket id provided','events-manager'));	
 			}			
 		    echo EM_Object::json_encode($result);
 			die();
@@ -76,7 +76,7 @@ function em_init_actions() {
 				}else{
 					$EM_Notices->add_confirm( $EM_Event->output(get_option('dbem_events_anonymous_result_success')), true);
 				}
-				$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : wp_get_referer();
+				$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : em_wp_get_referer();
 				$redirect = em_add_get_params($redirect, array('success'=>1), false, false);
 				wp_redirect( $redirect );
 				exit();
@@ -86,13 +86,14 @@ function em_init_actions() {
 			}
 		}
 		if ( $_REQUEST['action'] == 'event_duplicate' && wp_verify_nonce($_REQUEST['_wpnonce'],'event_duplicate_'.$EM_Event->event_id) ) {
-			$EM_Event = $EM_Event->duplicate();
-			if( $EM_Event === false ){
+			$event = $EM_Event->duplicate();
+			if( $event === false ){
 				$EM_Notices->add_error($EM_Event->errors, true);
+				wp_redirect( em_wp_get_referer() );
 			}else{
 				$EM_Notices->add_confirm($EM_Event->feedback_message, true);
+				wp_redirect( $event->get_edit_url() );
 			}
-			wp_redirect( wp_get_referer() );
 			exit();
 		}
 		if ( $_REQUEST['action'] == 'event_delete' && wp_verify_nonce($_REQUEST['_wpnonce'],'event_delete_'.$EM_Event->event_id) ) { 
@@ -103,15 +104,15 @@ function em_init_actions() {
 			}elseif( is_object($EM_Event) ){
 				$events_result = $EM_Event->delete();
 			}		
-			$plural = (count($selectedEvents) > 1) ? __('Events','dbem'):__('Event','dbem');
+			$plural = (count($selectedEvents) > 1) ? __('Events','events-manager'):__('Event','events-manager');
 			if($events_result){
-				$message = ( !empty($EM_Event->feedback_message) ) ? $EM_Event->feedback_message : sprintf(__('%s successfully deleted.','dbem'),$plural);
+				$message = ( !empty($EM_Event->feedback_message) ) ? $EM_Event->feedback_message : sprintf(__('%s successfully deleted.','events-manager'),$plural);
 				$EM_Notices->add_confirm( $message, true );
 			}else{
-				$message = ( !empty($EM_Event->errors) ) ? $EM_Event->errors : sprintf(__('%s could not be deleted.','dbem'),$plural);
+				$message = ( !empty($EM_Event->errors) ) ? $EM_Event->errors : sprintf(__('%s could not be deleted.','events-manager'),$plural);
 				$EM_Notices->add_error( $message, true );		
 			}
-			wp_redirect( wp_get_referer() );
+			wp_redirect( em_wp_get_referer() );
 			exit();
 		}elseif( $_REQUEST['action'] == 'event_detach' && wp_verify_nonce($_REQUEST['_wpnonce'],'event_detach_'.get_current_user_id().'_'.$EM_Event->event_id) ){ 
 			//Detach event and move on
@@ -120,7 +121,7 @@ function em_init_actions() {
 			}else{
 				$EM_Notices->add_error( $EM_Event->errors, true );			
 			}
-			wp_redirect(wp_get_referer());
+			wp_redirect(em_wp_get_referer());
 			exit();
 		}elseif( $_REQUEST['action'] == 'event_attach' && !empty($_REQUEST['undo_id']) && wp_verify_nonce($_REQUEST['_wpnonce'],'event_attach_'.get_current_user_id().'_'.$EM_Event->event_id) ){ 
 			//Detach event and move on
@@ -129,7 +130,7 @@ function em_init_actions() {
 			}else{
 				$EM_Notices->add_error( $EM_Event->errors, true );
 			}
-			wp_redirect(wp_get_referer());
+			wp_redirect(em_wp_get_referer());
 			exit();
 		}
 		
@@ -139,7 +140,9 @@ function em_init_actions() {
 				$return = array('result'=>true, 'message'=>$EM_Event->feedback_message);
 			}else{		
 				$return = array('result'=>false, 'message'=>$EM_Event->feedback_message, 'errors'=>$EM_Event->errors);
-			}	
+			}
+			echo EM_Object::json_encode($return);
+			edit();
 		}
 	}
 	
@@ -152,13 +155,13 @@ function em_init_actions() {
 		}else{
 			$EM_Location = new EM_Location();
 		}
-		if( $_REQUEST['action'] == 'location_save' && current_user_can('edit_locations') ){
+		if( $_REQUEST['action'] == 'location_save' && $EM_Location->can_manage('edit_locations','edit_others_locations') ){
 			//Check Nonces
 			em_verify_nonce('location_save');
 			//Grab and validate submitted data
 			if ( $EM_Location->get_post() && $EM_Location->save() ) { //EM_location gets the location if submitted via POST and validates it (safer than to depend on JS)
 				$EM_Notices->add_confirm($EM_Location->feedback_message, true);
-				$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : wp_get_referer();
+				$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : em_wp_get_referer();
 				wp_redirect( $redirect );
 				exit();
 			}else{
@@ -179,8 +182,8 @@ function em_init_actions() {
 				}
 				if( empty($errors) ){
 					$result = true;
-					$location_term = ( count($locations) > 1 ) ?__('Locations', 'dbem') : __('Location', 'dbem'); 
-					$EM_Notices->add_confirm( sprintf(__('%s successfully deleted', 'dbem'), $location_term) );
+					$location_term = ( count($locations) > 1 ) ?__('Locations', 'events-manager') : __('Location', 'events-manager'); 
+					$EM_Notices->add_confirm( sprintf(__('%s successfully deleted', 'events-manager'), $location_term) );
 				}else{
 					$result = false;
 				}
@@ -199,7 +202,7 @@ function em_init_actions() {
 					$location_cond = " AND location_private=0";		    
 				}
 				$location_cond = apply_filters('em_actions_locations_search_cond', $location_cond);
-				$term = (isset($_REQUEST['term'])) ? '%'.$_REQUEST['term'].'%' : '%'.$_REQUEST['q'].'%';
+				$term = (isset($_REQUEST['term'])) ? '%'.$wpdb->esc_like(stripslashes($_REQUEST['term'])).'%' : '%'.$wpdb->esc_like(stripslashes($_REQUEST['q'])).'%';
 				$sql = $wpdb->prepare("
 					SELECT 
 						location_id AS `id`,
@@ -331,7 +334,7 @@ function em_init_actions() {
 					$feedback = $EM_Booking->feedback_message;
 				}
 			}else{
-				$EM_Notices->add_error( __('You must log in to cancel your booking.', 'dbem') );
+				$EM_Notices->add_error( __('You must log in to cancel your booking.', 'events-manager') );
 			}
 		//TODO user action shouldn't check permission, booking object should.
 	  	}elseif( array_key_exists($_REQUEST['action'], $allowed_actions) && $EM_Event->can_manage('manage_bookings','manage_others_bookings') ){
@@ -375,7 +378,7 @@ function em_init_actions() {
 			if( $EM_Booking->can_manage('manage_bookings','manage_others_bookings') ){
 				if ($EM_Booking->get_post(true) && $EM_Booking->validate(true) && $EM_Booking->save(false) ){
 					$EM_Notices->add_confirm( $EM_Booking->feedback_message, true );
-					$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : wp_get_referer();
+					$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : em_wp_get_referer();
 					wp_redirect( $redirect );
 					exit();
 				}else{
@@ -391,16 +394,16 @@ function em_init_actions() {
 					if( !empty($_REQUEST['send_email']) ){
 						if( $EM_Booking->email() ){
 						    if( $EM_Booking->mails_sent > 0 ) {
-						        $EM_Booking->feedback_message .= " ".__('Email Sent.','dbem');
+						        $EM_Booking->feedback_message .= " ".__('Email Sent.','events-manager');
 						    }else{
-						        $EM_Booking->feedback_message .= " "._x('No emails to send for this booking.', 'bookings', 'dbem');
+						        $EM_Booking->feedback_message .= " "._x('No emails to send for this booking.', 'bookings', 'events-manager');
 						    }
 						}else{
-							$EM_Booking->feedback_message .= ' <span style="color:red">'.__('ERROR : Email Not Sent.','dbem').'</span>';
+							$EM_Booking->feedback_message .= ' <span style="color:red">'.__('ERROR : Email Not Sent.','events-manager').'</span>';
 						}
 					}
 					$EM_Notices->add_confirm( $EM_Booking->feedback_message, true );
-					$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : wp_get_referer();
+					$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : em_wp_get_referer();
 					wp_redirect( $redirect );
 					exit();
 				}else{
@@ -414,16 +417,16 @@ function em_init_actions() {
 			if( $EM_Booking->can_manage('manage_bookings','manage_others_bookings') ){
 				if( $EM_Booking->email(false, true) ){
 				    if( $EM_Booking->mails_sent > 0 ) {
-				        $EM_Notices->add_confirm( __('Email Sent.','dbem'), true );
+				        $EM_Notices->add_confirm( __('Email Sent.','events-manager'), true );
 				    }else{
-				        $EM_Notices->add_confirm( _x('No emails to send for this booking.', 'bookings', 'dbem'), true );
+				        $EM_Notices->add_confirm( _x('No emails to send for this booking.', 'bookings', 'events-manager'), true );
 				    }
-					$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : wp_get_referer();
+					$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : em_wp_get_referer();
 					wp_redirect( $redirect );
 					exit();
 				}else{
 					$result = false;
-					$EM_Notices->add_error( __('ERROR : Email Not Sent.','dbem') );			
+					$EM_Notices->add_error( __('ERROR : Email Not Sent.','events-manager') );			
 					$feedback = $EM_Booking->feedback_message;
 				}	
 			}
@@ -437,7 +440,7 @@ function em_init_actions() {
 			    	$wpdb->update(EM_BOOKINGS_TABLE, array('booking_meta'=> serialize($EM_Booking->booking_meta)), array('booking_id'=>$EM_Booking->booking_id))
 				){
 					$EM_Notices->add_confirm( $EM_Booking->feedback_message, true );
-					$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : wp_get_referer();
+					$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : em_wp_get_referer();
 					wp_redirect( $redirect );
 					exit();
 				}else{
@@ -447,7 +450,18 @@ function em_init_actions() {
 				}	
 			}
 			do_action('em_booking_modify_person', $EM_Event, $EM_Booking);
+		}elseif( $_REQUEST['action'] == 'bookings_add_note' && $EM_Booking->can_manage('manage_bookings','manage_others_bookings') ) {
+			em_verify_nonce('bookings_add_note');
+			if( $EM_Booking->add_note(stripslashes($_REQUEST['booking_note'])) ){
+				$EM_Notices->add_confirm($EM_Booking->feedback_message, true);
+				$redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : em_wp_get_referer();
+				wp_redirect( $redirect );
+				exit();
+			}else{
+				$EM_Notices->add_error($EM_Booking->errors);
+			}
 		}
+	
 		if( $result && defined('DOING_AJAX') ){
 			$return = array('result'=>true, 'message'=>$feedback);
 			header( 'Content-Type: application/javascript; charset=UTF-8', true ); //add this for HTTP -> HTTPS requests which assume it's a cross-site request
@@ -606,17 +620,19 @@ function em_init_actions() {
 		echo "\xEF\xBB\xBF"; // UTF-8 for MS Excel (a little hacky... but does the job)
 		if( !defined('EM_CSV_DISABLE_HEADERS') || !EM_CSV_DISABLE_HEADERS ){
 			if( !empty($_REQUEST['event_id']) ){
-				echo __('Event','dbem') . ' : ' . $EM_Event->event_name .  "\n";
-				if( $EM_Event->location_id > 0 ) echo __('Where','dbem') . ' - ' . $EM_Event->get_location()->location_name .  "\n";
-				echo __('When','dbem') . ' : ' . $EM_Event->output('#_EVENTDATES - #_EVENTTIMES') .  "\n";
+				echo __('Event','events-manager') . ' : ' . $EM_Event->event_name .  "\n";
+				if( $EM_Event->location_id > 0 ) echo __('Where','events-manager') . ' - ' . $EM_Event->get_location()->location_name .  "\n";
+				echo __('When','events-manager') . ' : ' . $EM_Event->output('#_EVENTDATES - #_EVENTTIMES') .  "\n";
 			}
-			echo sprintf(__('Exported booking on %s','dbem'), date_i18n('D d M Y h:i', current_time('timestamp'))) .  "\n";
+			echo sprintf(__('Exported booking on %s','events-manager'), date_i18n('D d M Y h:i', current_time('timestamp'))) .  "\n";
 		}
-		echo '"'. implode('","', $EM_Bookings_Table->get_headers(true)). '"' .  "\n";
+		$delimiter = !defined('EM_CSV_DELIMITER') ? ',' : EM_CSV_DELIMITER;
+		$delimiter = apply_filters('em_csv_delimiter', $delimiter);
 		//Rows
 		$EM_Bookings_Table->limit = 150; //if you're having server memory issues, try messing with this number
 		$EM_Bookings = $EM_Bookings_Table->get_bookings();
 		$handle = fopen("php://output", "w");
+		fputcsv($handle, $EM_Bookings_Table->get_headers(true), $delimiter);
 		while(!empty($EM_Bookings->bookings)){
 			foreach( $EM_Bookings->bookings as $EM_Booking ) {
 				//Display all values
@@ -625,11 +641,11 @@ function em_init_actions() {
 				if( $show_tickets ){
 					foreach($EM_Booking->get_tickets_bookings()->tickets_bookings as $EM_Ticket_Booking){
 						$row = $EM_Bookings_Table->get_row_csv($EM_Ticket_Booking);
-						fputcsv($handle, $row);
+						fputcsv($handle, $row, $delimiter);
 					}
 				}else{
 					$row = $EM_Bookings_Table->get_row_csv($EM_Booking);
-					fputcsv($handle, $row);
+					fputcsv($handle, $row, $delimiter);
 				}
 			}
 			//reiterate loop
@@ -646,6 +662,7 @@ add_action('init','em_init_actions',11);
  * Handles AJAX Bookings admin table filtering, view changes and pagination
  */
 function em_ajax_bookings_table(){
+    check_admin_referer('em_bookings_table');
 	$EM_Bookings_Table = new EM_Bookings_Table();
 	$EM_Bookings_Table->output_table();
 	exit();

@@ -51,9 +51,6 @@ class s2class {
 			}
 		}
 
-		// option to store ReadyGraph API Key
-		add_option('readygraph_api', "include your api_key");
-
 		// safety check if options exist and if not create them
 		if ( !is_array($this->subscribe2_options) ) {
 			$this->reset();
@@ -513,7 +510,7 @@ class s2class {
 
  		$plaintext = trim(strip_tags($plaintext));
 
-		if ( strstr($mailtext, "{REFERENCELINKS}") && $plaintext_links != '' ) {
+		if ( isset( $plaintext_links ) && '' !== $plaintext_links ) {
 			$plaintext .= "\r\n\r\n" . trim($plaintext_links);
 		}
 
@@ -1365,7 +1362,9 @@ class s2class {
 			}
 		} else {
 			// we are sending a preview
-			$posts = get_posts('numberposts=1');
+			// $posts = get_posts('numberposts=1');
+			$posts = get_posts('numberposts=3');
+			$posts = apply_filters('s2_cron_preview_posts', $posts, $this);
 		}
 
 		// Collect sticky posts if desired
@@ -1510,16 +1509,18 @@ class s2class {
 			$message_posttime .= $excerpt . "\r\n\r\n";
 		}
 
-		// update post_meta data for sent ids but not sticky posts
-		foreach ( $ids as $id ) {
-			if ( !empty($sticky_ids) && !in_array($id, $sticky_ids) ) {
-				update_post_meta($id, '_s2_digest_post_status', 'done');
-			} else {
-				update_post_meta($id, '_s2_digest_post_status', 'done');
+		// we are not sending a preview so update post_meta data for sent ids but not sticky posts
+		if ( '' === $preview ) {
+			foreach ( $ids as $id ) {
+				if ( ! empty( $sticky_ids ) && ! in_array( $id, $sticky_ids ) ) {
+					update_post_meta( $id, '_s2_digest_post_status', 'done' );
+				} else {
+					update_post_meta( $id, '_s2_digest_post_status', 'done' );
+				}
 			}
+			$this->subscribe2_options['last_s2cron'] = implode( ',', $digest_post_ids );
+			update_option( 'subscribe2_options', $this->subscribe2_options );
 		}
-		$this->subscribe2_options['last_s2cron'] = implode(',', $digest_post_ids);
-		update_option('subscribe2_options', $this->subscribe2_options);
 
 		// we add a blank line after each post excerpt now trim white space that occurs for the last post
 		$message_post = trim($message_post);
@@ -1696,7 +1697,14 @@ class s2class {
 		if ( $this->clean_interval > 0 ) {
 			add_action('wp_scheduled_delete', array(&$this, 's2cleaner_task'));
 		}
-//		add_action('admin_init', array(&$this, 'on_plugin_activated_redirect'));
+
+		// add ajax class if enabled
+		if ( '1' === $this->subscribe2_options['ajax'] ) {
+			require_once( S2PATH . 'classes/class-s2-ajax.php' );
+			global $mysubscribe2_ajax;
+			$mysubscribe2_ajax = new S2_Ajax_Class;
+		}
+
 		// Add actions specific to admin or frontend
 		if ( is_admin() ) {
 			//add menu, authoring and category admin actions
@@ -1763,12 +1771,6 @@ class s2class {
 			// add actions for other plugins
 			if ( '1' == $this->subscribe2_options['show_meta'] ) {
 				add_action('wp_meta', array(&$this, 'add_minimeta'), 0);
-			}
-
-			// add actions for ajax form if enabled
-			if ( '1' == $this->subscribe2_options['ajax'] ) {
-				add_action('wp_enqueue_scripts', array(&$this, 'add_ajax'));
-				add_action('wp_footer', array(&$this, 'add_s2_ajax'));
 			}
 		}
 	} // end s2init()

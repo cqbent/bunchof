@@ -38,7 +38,7 @@ class EM_Tag extends EM_Object {
 	 * @param $tag_data
 	 * @return null
 	 */
-	function EM_Tag( $tag_data = false ) {
+	function __construct( $tag_data = false ) {
 		global $wpdb;
 		//Initialize
 		$tag = array();
@@ -120,6 +120,9 @@ class EM_Tag extends EM_Object {
 				case '#_TAGID':
 					$replace = $this->term_id;
 					break;
+				case '#_TAGSLUG':
+					$replace = $this->slug;
+					break;
 				case '#_TAGLINK':
 				case '#_TAGURL':
 					$link = $this->get_url();
@@ -142,13 +145,13 @@ class EM_Tag extends EM_Object {
 				case '#_TAGNOTES':
 					$replace = $this->description;
 					break;
-				case '#_TAGEVENTSPAST': //depreciated, erroneous documentation, left for compatability
-				case '#_TAGEVENTSNEXT': //depreciated, erroneous documentation, left for compatability
-				case '#_TAGEVENTSALL': //depreciated, erroneous documentation, left for compatability
+				case '#_TAGEVENTSPAST': //deprecated, erroneous documentation, left for compatability
+				case '#_TAGEVENTSNEXT': //deprecated, erroneous documentation, left for compatability
+				case '#_TAGEVENTSALL': //deprecated, erroneous documentation, left for compatability
 				case '#_TAGPASTEVENTS':
 				case '#_TAGNEXTEVENTS':
 				case '#_TAGALLEVENTS':
-					//convert depreciated placeholders for compatability
+					//convert deprecated placeholders for compatability
 					$result = ($result == '#_TAGEVENTSPAST') ? '#_TAGPASTEVENTS':$result; 
 					$result = ($result == '#_TAGEVENTSNEXT') ? '#_TAGNEXTEVENTS':$result;
 					$result = ($result == '#_TAGEVENTSALL') ? '#_TAGALLEVENTS':$result;

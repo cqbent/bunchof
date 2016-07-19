@@ -111,8 +111,8 @@ if ( function_exists( 'bp_post_get_permalink' ) ) { // ugly ugly ugly hack to ch
 		<form action="<?php invite_anyone_group_invite_form_action() ?>" method="post" id="send-invite-form">
 	<?php endif; ?>
 
-	<div class="left-menu">
-		<p><?php _e("Search for members to invite:", 'invite-anyone') ?></p>
+	<div class="left-menu yyy">
+		<p>Search for a member from the BunchOf Gardener directory to invite to this group:</p>
 
 		<ul class="first acfb-holder">
 			<li>
@@ -124,11 +124,12 @@ if ( function_exists( 'bp_post_get_permalink' ) ) { // ugly ugly ugly hack to ch
                 
                 <div>
 		<?php if ( ! invite_anyone_is_large_network( 'users' ) ) : ?>
-			<p><?php _e( 'Select members from the directory:', 'invite-anyone' ) ?></p>
+			<p>Select your BunchOf Gardener friends to invite to this group:</p>
 
 			<div id="invite-anyone-member-list">
 				<ul>
-					<?php bp_new_group_invite_member_list() ?>
+					<?php bp_new_group_invite_friend_list(); ?>
+					<?php //bp_new_group_invite_member_list() ?>
 				</ul>
 			</div>
 		<?php endif ?>
@@ -137,8 +138,10 @@ if ( function_exists( 'bp_post_get_permalink' ) ) { // ugly ugly ugly hack to ch
 
 	<div class="main-column">
 
-		<div id="message" class="info">
-			<p><?php _e('Select people to invite from your friends list.', 'buddypress'); ?></p>
+		<div id="message-alt" class="info em-heading">
+			<p>The members selected (from left) for group invitation appear below. Click on "Send Invites"
+				button at bottom of screen to send invitations.
+			</p>
 		</div>
 
 		<?php do_action( 'bp_before_group_send_invites_list' ) ?>

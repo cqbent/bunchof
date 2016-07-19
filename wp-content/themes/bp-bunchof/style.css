@@ -25,9 +25,11 @@ border:1px solid #ddd;
 -moz-border-radius: 6px;
 -webkit-border-radius: 6px;
 border-radius: 6px;
-overflow: hidden;
 position: relative;
 width: 100%;
+}
+div.page {
+    overflow: visible;
 }
 
 
@@ -496,7 +498,8 @@ label[for=group-field-one]:after{content: ' (required)';}
 }
 
 /* event ticket styles (hide stuff) */
-.ticket-name, .ticket-description, .ticket-price, .ticket-options {
+.ticket-name, .ticket-description, .ticket-price, .ticket-options,
+.em-ticket-form-advanced .ticket-spaces, .em-ticket-form-advanced .ticket-dates-from, .em-ticket-form-advanced .ticket-type {
     display: none; visibility: hidden;
 }
 .single-event #respond {
@@ -571,10 +574,20 @@ button.rtmedia-like {
     background:url('/wp-content/uploads/2013/02/demo-image.jpg');
 }	 	 
 .homeblock { 
-    width:420px !important; height:150px; padding:25px; 
-    border:1px solid #eaeaea; border-radius:8px; 
-    background:#f9f9f9;margin:10px;
-}	 	 
+    width: calc(50% - 20px);
+    min-height:220px;
+    padding:20px;
+    box-sizing: border-box;
+    float: left;
+    border:1px solid #eaeaea;
+    border-radius:8px;
+    background:#f9f9f9;
+    margin:10px 20px 10px 0;
+}
+homeblock:last-child {
+    margin-left: 20px;
+    margin-right: 0;
+}
 .home ol li { 
     margin-bottom:4px; 
 }
@@ -590,4 +603,12 @@ button.rtmedia-like {
 /* hide location not found message */
 .em-location-map-404 {
     display: none !important;
+}
+
+@media all and (max-width: 900px) {
+    .homeblock {
+        width: 100%;
+        margin: 10px 0;
+        float: none;
+    }
 }

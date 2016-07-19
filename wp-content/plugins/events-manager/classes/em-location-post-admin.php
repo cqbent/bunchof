@@ -62,9 +62,10 @@ class EM_Location_Post_Admin{
 		if( !$untrashing && $is_post_type && $saving_status ){
 			if( !empty($_REQUEST['_emnonce']) && wp_verify_nonce($_REQUEST['_emnonce'], 'edit_location') ){ 
 				//this is only run if we know form data was submitted, hence the nonce
-				$EM_Location = em_get_location();
+				$EM_Location = em_get_location($post_ID, 'post_id');
+				$EM_Location->post_type = $post_type;
 				//Handle Errors by making post draft
-				$get_meta = $EM_Location->get_post_meta();
+				$get_meta = $EM_Location->get_post_meta(false);
 				$validate_meta = $EM_Location->validate_meta();
 				if( !$get_meta || !$validate_meta ) $data['post_status'] = 'draft';
 			}
@@ -84,13 +85,14 @@ class EM_Location_Post_Admin{
 		if(!defined('UNTRASHING_'.$post_id) && $is_post_type && $saving_status){
 			if( !empty($_REQUEST['_emnonce']) && wp_verify_nonce($_REQUEST['_emnonce'], 'edit_location')){
 				$EM_Location = em_get_location($post_id, 'post_id');
+				$get_meta = $EM_Location->get_post_meta(false);
+				$validate_meta = $EM_Location->validate_meta();
 				do_action('em_location_save_pre', $EM_Location);
-				$get_meta = $EM_Location->get_post_meta();
 				$save_meta = $EM_Location->save_meta();
 				//Handle Errors by making post draft
-				if( !$get_meta || !$save_meta ){
+				if( !$get_meta || !$validate_meta || !$save_meta ){
 					$EM_Location->set_status(null, true);
-					$EM_Notices->add_error( '<strong>'.sprintf(__('Your %s details are incorrect and cannot be published, please correct these errors first:','dbem'),__('location','dbem')).'</strong>', true); //Always seems to redirect, so we make it static
+					$EM_Notices->add_error( '<strong>'.sprintf(__('Your %s details are incorrect and cannot be published, please correct these errors first:','events-manager'),__('location','events-manager')).'</strong>', true); //Always seems to redirect, so we make it static
 					$EM_Notices->add_error($EM_Location->get_errors(), true); //Always seems to redirect, so we make it static
 					apply_filters('em_location_save', false , $EM_Location);
 				}else{
@@ -147,10 +149,17 @@ class EM_Location_Post_Admin{
 	}
 	
 	public static function meta_boxes(){
-		add_meta_box('em-location-where', __('Where','dbem'), array('EM_Location_Post_Admin','meta_box_where'),EM_POST_TYPE_LOCATION, 'normal','high');
-		//add_meta_box('em-location-metadump', __('EM_Location Meta Dump','dbem'), array('EM_Location_Post_Admin','meta_box_metadump'),EM_POST_TYPE_LOCATION, 'normal','high');
+		global $EM_Location, $post;
+		//no need to proceed if we're not dealing with a location
+		if( $post->post_type != EM_POST_TYPE_LOCATION ) return;
+		//since this is the first point when the admin area loads location stuff, we load our EM_Event here
+		if( empty($EM_Location) && !empty($post) ){
+			$EM_Location = em_get_location($post->ID, 'post_id');
+		}
+		add_meta_box('em-location-where', __('Where','events-manager'), array('EM_Location_Post_Admin','meta_box_where'),EM_POST_TYPE_LOCATION, 'normal','high');
+		//add_meta_box('em-location-metadump', __('EM_Location Meta Dump','events-manager'), array('EM_Location_Post_Admin','meta_box_metadump'),EM_POST_TYPE_LOCATION, 'normal','high');
 		if( get_option('dbem_location_attributes_enabled') ){
-			add_meta_box('em-location-attributes', __('Attributes','dbem'), array('EM_Location_Post_Admin','meta_box_attributes'),EM_POST_TYPE_LOCATION, 'normal','default');
+			add_meta_box('em-location-attributes', __('Attributes','events-manager'), array('EM_Location_Post_Admin','meta_box_attributes'),EM_POST_TYPE_LOCATION, 'normal','default');
 		}
 	}
 	

@@ -2,12 +2,13 @@
 
 /*
   Plugin Name: rtMedia for WordPress, BuddyPress and bbPress
-  Plugin URI: http://rtcamp.com/rtmedia/?utm_source=dashboard&utm_medium=plugin&utm_campaign=buddypress-media
+  Plugin URI: https://rtmedia.io/?utm_source=dashboard&utm_medium=plugin&utm_campaign=buddypress-media
   Description: This plugin adds missing media rich features like photos, videos and audio uploading to BuddyPress which are essential if you are building social network, seriously!
-  Version: 3.7.43
+  Version: 4.0.4
   Author: rtCamp
-  Text Domain: rtmedia
+  Text Domain: buddypress-media
   Author URI: http://rtcamp.com/?utm_source=dashboard&utm_medium=plugin&utm_campaign=buddypress-media
+  Domain Path: /languages/
  */
 
 /**
@@ -16,7 +17,7 @@
  * @package    BuddyPressMedia
  * @subpackage Main
  */
-if ( ! defined( 'RTMEDIA_PATH' ) ){
+if ( ! defined( 'RTMEDIA_PATH' ) ) {
 
 	/**
 	 *  The server file system path to the plugin directory
@@ -25,7 +26,7 @@ if ( ! defined( 'RTMEDIA_PATH' ) ){
 	define( 'RTMEDIA_PATH', plugin_dir_path( __FILE__ ) );
 }
 
-if ( ! defined( 'BP_MEDIA_PATH' ) ){
+if ( ! defined( 'BP_MEDIA_PATH' ) ) {
 
 	/**
 	 *  Legacy support
@@ -35,7 +36,7 @@ if ( ! defined( 'BP_MEDIA_PATH' ) ){
 }
 
 
-if ( ! defined( 'RTMEDIA_URL' ) ){
+if ( ! defined( 'RTMEDIA_URL' ) ) {
 
 	/**
 	 * The url to the plugin directory
@@ -44,28 +45,13 @@ if ( ! defined( 'RTMEDIA_URL' ) ){
 	define( 'RTMEDIA_URL', plugin_dir_url( __FILE__ ) );
 }
 
-if ( ! defined( 'RTMEDIA_BASE_NAME' ) ){
+if ( ! defined( 'RTMEDIA_BASE_NAME' ) ) {
 
 	/**
 	 * The url to the plugin directory
 	 *
 	 */
 	define( 'RTMEDIA_BASE_NAME', plugin_basename( __FILE__ ) );
-}
-
-if ( ! defined( 'RTMEDIA_BOWER_COMPONENTS_URL' ) ){
-	/**
-	 * The url to the foundation resources
-	 *
-	 */
-	define( 'RTMEDIA_BOWER_COMPONENTS_URL', RTMEDIA_URL . 'app/assets/sass/bower_components/foundation/' );
-}
-
-/**
- * Start session here to avoid header notice
- */
-if ( ! session_id() ){
-	session_start();
 }
 
 /**
@@ -75,7 +61,7 @@ if ( ! session_id() ){
  *
  * @param string $class_name The name of the class to autoload
  */
-function rtmedia_autoloader( $class_name ){
+function rtmedia_autoloader( $class_name ) {
 	$rtlibpath = array(
 		'app/services/' . $class_name . '.php',
 		'app/helper/' . $class_name . '.php',
@@ -106,7 +92,7 @@ function rtmedia_autoloader( $class_name ){
 	);
 	foreach ( $rtlibpath as $path ) {
 		$path = RTMEDIA_PATH . $path;
-		if ( file_exists( $path ) ){
+		if ( file_exists( $path ) ) {
 			include $path;
 			break;
 		}
@@ -124,7 +110,9 @@ spl_autoload_register( 'rtmedia_autoloader' );
 global $rtmedia;
 $rtmedia = new RTMedia();
 
-
+function is_rtmedia_vip_plugin() {
+	return ( defined( 'WPCOM_IS_VIP_ENV' ) && WPCOM_IS_VIP_ENV );
+}
 /*
  * Look Ma! Very few includes! Next File: /app/main/RTMedia.php
  */

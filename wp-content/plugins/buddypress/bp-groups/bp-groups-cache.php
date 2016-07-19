@@ -1,16 +1,16 @@
 <?php
-
 /**
- * BuddyPress Groups Caching
+ * BuddyPress Groups Caching.
  *
  * Caching functions handle the clearing of cached objects and pages on specific
  * actions throughout BuddyPress.
  *
  * @package BuddyPress
  * @subpackage Groups
+ * @since 1.5.0
  */
 
-// Exit if accessed directly
+// Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -24,11 +24,14 @@ defined( 'ABSPATH' ) || exit;
  * $group_ids and adds it to WP cache. This improves efficiency when using
  * groupmeta within a loop context.
  *
- * @param int|str|array $group_ids Accepts a single group_id, or a
- *        comma-separated list or array of group ids.
+ * @since 1.6.0
+ *
+ * @param int|string|array|bool $group_ids Accepts a single group_id, or a
+ *                                         comma-separated list or array of
+ *                                         group ids.
  */
 function bp_groups_update_meta_cache( $group_ids = false ) {
-	global $bp;
+	$bp = buddypress();
 
 	$cache_args = array(
 		'object_ids' 	   => $group_ids,
@@ -45,7 +48,9 @@ function bp_groups_update_meta_cache( $group_ids = false ) {
 /**
  * Clear the cached group count.
  *
- * @param $group_id Not used.
+ * @since 1.0.0
+ *
+ * @param int $group_id Not used.
  */
 function groups_clear_group_object_cache( $group_id ) {
 	wp_cache_delete( 'bp_total_group_count', 'bp' );
@@ -59,7 +64,7 @@ add_action( 'groups_create_group_step_complete', 'groups_clear_group_object_cach
 /**
  * Bust group caches when editing or deleting.
  *
- * @since BuddyPress (1.7.0)
+ * @since 1.7.0
  *
  * @param int $group_id The group being edited.
  */
@@ -74,7 +79,10 @@ add_action( 'groups_settings_updated', 'bp_groups_delete_group_cache' );
 /**
  * Bust group cache when modifying metadata.
  *
- * @since BuddyPress (2.0.0)
+ * @since 2.0.0
+ *
+ * @param int $meta_id Meta ID.
+ * @param int $group_id Group ID.
  */
 function bp_groups_delete_group_cache_on_metadata_change( $meta_id, $group_id ) {
 	wp_cache_delete( $group_id, 'bp_groups' );
@@ -85,27 +93,27 @@ add_action( 'added_group_meta', 'bp_groups_delete_group_cache_on_metadata_change
 /**
  * Clear caches for the group creator when a group is created.
  *
- * @since BuddyPress (1.6.0)
+ * @since 1.6.0
  *
- * @param int $group_id ID of the group.
+ * @param int             $group_id  ID of the group.
  * @param BP_Groups_Group $group_obj Group object.
  */
 function bp_groups_clear_group_creator_cache( $group_id, $group_obj ) {
-	// Clears the 'total groups' for this user
+	// Clears the 'total groups' for this user.
 	groups_clear_group_user_object_cache( $group_obj->id, $group_obj->creator_id );
 }
 add_action( 'groups_created_group', 'bp_groups_clear_group_creator_cache', 10, 2 );
 
 /**
- * Clears caches for all members in a group when a group is deleted
+ * Clears caches for all members in a group when a group is deleted.
  *
- * @since BuddyPress (1.6.0)
+ * @since 1.6.0
  *
  * @param BP_Groups_Group $group_obj Group object.
- * @param array User IDs who were in this group.
+ * @param array           $user_ids  User IDs who were in this group.
  */
 function bp_groups_clear_group_members_caches( $group_obj, $user_ids ) {
-	// Clears the 'total groups' cache for each member in a group
+	// Clears the 'total groups' cache for each member in a group.
 	foreach ( (array) $user_ids as $user_id )
 		groups_clear_group_user_object_cache( $group_obj->id, $user_id );
 }
@@ -116,7 +124,7 @@ add_action( 'bp_groups_delete_group', 'bp_groups_clear_group_members_caches', 10
  *
  * Count is cleared when an invite is accepted, rejected or deleted.
  *
- * @since BuddyPress (2.0.0)
+ * @since 2.0.0
  *
  * @param int $user_id The user ID.
  */
@@ -132,10 +140,10 @@ add_action( 'groups_delete_invite', 'bp_groups_clear_invite_count_for_user' );
  *
  * Groan. Our API functions are not consistent.
  *
- * @since BuddyPress (2.0.0)
+ * @since 2.0.0
  *
  * @param int $group_id The group ID. Not used in this function.
- * @param int $user_id The user ID.
+ * @param int $user_id  The user ID.
  */
 function bp_groups_clear_invite_count_on_uninvite( $group_id, $user_id ) {
 	bp_groups_clear_invite_count_for_user( $user_id );
@@ -145,9 +153,9 @@ add_action( 'groups_uninvite_user', 'bp_groups_clear_invite_count_on_uninvite', 
 /**
  * Clear a user's cached total group invite count when a new invite is sent.
  *
- * @since BuddyPress (2.0.0)
+ * @since 2.0.0
  *
- * @param int $group_id The group ID. Not used in this function.
+ * @param int   $group_id      The group ID. Not used in this function.
  * @param array $invited_users Array of invited user IDs.
  */
 function bp_groups_clear_invite_count_on_send( $group_id, $invited_users ) {
@@ -160,8 +168,10 @@ add_action( 'groups_send_invites', 'bp_groups_clear_invite_count_on_send', 10, 2
 /**
  * Clear a user's cached group count.
  *
+ * @since 1.2.0
+ *
  * @param int $group_id The group ID. Not used in this function.
- * @param int $user_id The user ID.
+ * @param int $user_id  The user ID.
  */
 function groups_clear_group_user_object_cache( $group_id, $user_id ) {
 	wp_cache_delete( 'bp_total_groups_for_user_' . $user_id, 'bp' );
@@ -176,7 +186,7 @@ add_action( 'groups_remove_member', 'groups_clear_group_user_object_cache', 10, 
 /**
  * Clear group administrator cache.
  *
- * @since BuddyPress (2.1.0)
+ * @since 2.1.0
  *
  * @param int $group_id The group ID.
  */
@@ -193,14 +203,55 @@ add_action( 'groups_delete_group',   'groups_clear_group_administrator_cache' );
  * This accounts for situations where group administrators are added manually
  * using {@link BP_Groups_Member::save()}.  Usually via a plugin.
  *
- * @since BuddyPress (2.1.0)
+ * @since 2.1.0
  *
- * @param BP_Groups_Member $member
+ * @param BP_Groups_Member $member Member object.
  */
 function groups_clear_group_administrator_cache_on_member_save( BP_Groups_Member $member ) {
 	groups_clear_group_administrator_cache( $member->group_id );
 }
 add_action( 'groups_member_after_save', 'groups_clear_group_administrator_cache_on_member_save' );
+
+/**
+ * Clear the group type cache for a group.
+ *
+ * Called when group is deleted.
+ *
+ * @since 2.6.0
+ *
+ * @param int $group_id The group ID.
+ */
+function groups_clear_group_type_cache( $group_id = 0 ) {
+	wp_cache_delete( $group_id, 'bp_groups_group_type' );
+}
+add_action( 'groups_delete_group', 'groups_clear_group_type_cache' );
+
+/**
+ * Clear caches on membership save.
+ *
+ * @since 2.6.0
+ */
+function bp_groups_clear_user_group_cache_on_membership_save( BP_Groups_Member $member ) {
+	wp_cache_delete( $member->user_id, 'bp_groups_memberships_for_user' );
+	wp_cache_delete( $member->id, 'bp_groups_memberships' );
+}
+add_action( 'groups_member_before_save', 'bp_groups_clear_user_group_cache_on_membership_save' );
+add_action( 'groups_member_before_remove', 'bp_groups_clear_user_group_cache_on_membership_save' );
+
+/**
+ * Clear group memberships cache on miscellaneous actions not covered by the 'after_save' hook.
+ *
+ * @since 2.6.0
+ */
+function bp_groups_clear_user_group_cache_on_other_events( $user_id, $group_id ) {
+	wp_cache_delete( $user_id, 'bp_groups_memberships_for_user' );
+
+	$membership = new BP_Groups_Member( $user_id, $group_id );
+	wp_cache_delete( $membership->id, 'bp_groups_memberships' );
+}
+add_action( 'bp_groups_member_before_delete', 'bp_groups_clear_user_group_cache_on_other_events', 10, 2 );
+add_action( 'bp_groups_member_before_delete_invite', 'bp_groups_clear_user_group_cache_on_other_events', 10, 2 );
+add_action( 'groups_accept_invite', 'bp_groups_clear_user_group_cache_on_other_events', 10, 2 );
 
 /* List actions to clear super cached pages on, if super cache is installed */
 add_action( 'groups_join_group',                 'bp_core_clear_cache' );

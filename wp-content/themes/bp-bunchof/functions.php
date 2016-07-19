@@ -101,6 +101,39 @@ function search_default($component) {
 
 add_filter( 'bp_get_search_default_text', 'search_default', 1 );
 
+function bunchof_register_media_taxonomy() {
+    register_taxonomy_for_object_type( 'category', 'attachment' );
+}
+add_action( 'init', 'bunchof_register_media_taxonomy' );
+
+function bunchof_add_image_category_filter() {
+    $screen = get_current_screen();
+    if ( 'upload' == $screen->id ) {
+        $dropdown_options = array( 'show_option_all' => __( 'View all categories', 'bp-bunchof' ), 'hide_empty' => false, 'hierarchical' => true, 'orderby' => 'name', );
+        wp_dropdown_categories( $dropdown_options );
+    }
+}
+add_action( 'restrict_manage_posts', 'bunchof_add_image_category_filter' );
+
+function display_home_slider() {
+    // get images with category slider
+    $args = array(
+        'post_type' => 'attachment',
+        'post_mime_type' =>'image',
+        'post_status' => 'inherit',
+        'category_name' => 'slider',
+        'order'    => 'DESC'
+    );
+    $imgquery = new WP_Query($args);
+    $imglist = '';
+    foreach ( $imgquery->posts as $image) {
+        $imglist .= '<li><img title="'.$image->post_excerpt.'" src="'.$image->guid.'" alt="'.$image->post_excerpt.'" /></li>';
+    }
+    //var_dump($imglist->posts);
+    return '<div id="banner-fade"><ul class="bjqs">'.$imglist.'</ul></div>';
+}
+add_shortcode('home_slider', 'display_home_slider');
+
 
 function add_bubble($text) {
     $close = '<a id="closepanel" href="#"><span class="entypo-cancel-squared"></span> Got it! close this message.</a>';
@@ -205,7 +238,16 @@ function max_upload_filesize_message() {
     'kb</div>';
     print $msg;
 }
-add_action('bp_before_group_avatar_creation_step','max_upload_filesize_message')
+add_action('bp_before_group_avatar_creation_step','max_upload_filesize_message');
 
+function bp_dtheme_header_style() {
+    // do nothing here
+}
+
+function profile_edit_message() {
+    $message = '<p>Note: aside from your name and avatar, only friends may see your personal information.</p>';
+    add_bubble($message);
+}
+add_action('bp_before_profile_field_content','profile_edit_message');
 
 ?>

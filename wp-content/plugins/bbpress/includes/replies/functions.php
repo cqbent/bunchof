@@ -1396,7 +1396,7 @@ function bbp_move_reply_handler( $action = '' ) {
 		bbp_update_reply_to( $child->ID, $parent );
 
 	// Remove reply_to from moved reply
-	delete_post_meta( $move_reply->ID, '_bbp_reply_to' ); 
+	delete_post_meta( $move_reply->ID, '_bbp_reply_to' );
 
 	// It is a new topic and we need to set some default metas to make
 	// the topic display in bbp_has_topics() list
@@ -1495,7 +1495,6 @@ function bbp_move_reply_count( $move_reply_id, $source_topic_id, $destination_to
  * @uses do_action() Calls 'bbp_toggle_reply_handler' with success, post data
  *                    and action
  * @uses bbp_get_reply_url() To get the reply url
- * @uses add_query_arg() To add custom args to the reply url
  * @uses wp_safe_redirect() To redirect to the reply
  * @uses bbPress::errors:add() To log the error messages
  */
@@ -1995,7 +1994,7 @@ function bbp_display_replies_feed_rss2( $replies_query = array() ) {
 		$title = ' &#187; ' .  __( 'All Replies', 'bbpress' );
 
 	// Display the feed
-	header( 'Content-Type: ' . feed_content_type( 'rss-http' ) . '; charset=' . get_option( 'blog_charset' ), true );
+	header( 'Content-Type: ' . feed_content_type( 'rss2' ) . '; charset=' . get_option( 'blog_charset' ), true );
 	header( 'Status: 200 OK' );
 	echo '<?xml version="1.0" encoding="' . get_option( 'blog_charset' ) . '"?' . '>'; ?>
 
@@ -2222,7 +2221,7 @@ function bbp_list_replies( $args = array() ) {
 
 /**
  * Validate a `reply_to` field for hierarchical replies
- * 
+ *
  * Checks for 2 scenarios:
  * -- The reply to ID is actually a reply
  * -- The reply to ID does not match the current reply
