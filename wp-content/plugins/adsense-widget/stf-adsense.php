@@ -2,8 +2,8 @@
 /*
 Plugin Name: Adsense Widget
 Plugin URI: http://shailan.com/wordpress/plugins/adsense-widget/
-Description: Simply the best <strong>Google Adsense Widget</strong>. Select ad type easily on your site. Define slot & channel ids for statistics. Color customization via php. Easy to use shortcode <code>[adsense]</code>! Powered by <a href="http://shailan.com/">Shailan.com</a>. Visit: <a href="http://shailan.com/wordpress/plugins/adsense-widget/">Plugin page</a> | <a href="http://shailan.com/wordpress/plugins/adsense-widget/help/">Documentation</a> | <a href="http://shailan.com/wordpress/plugins/adsense-widget/shortcode/">Shortcode Usage</a>.
-Version: 1.6
+Description: Simply the best <strong>Google Adsense Widget</strong>. Select ad type easily on your site. Define slot & channel ids for statistics. Hide ads for admins & users. Customizable colors. Easy to use shortcode <code>[adsense]</code>! Powered by <a href="http://shailan.com/">Shailan.com</a>. Visit: <a href="http://shailan.com/wordpress/plugins/adsense-widget/">Plugin page</a> | <a href="http://shailan.com/wordpress/plugins/adsense-widget/help/">Documentation</a> | <a href="http://shailan.com/wordpress/plugins/adsense-widget/shortcode/">Shortcode Usage</a>.
+Version: 1.6.1
 Author: Matt Say
 Author URI: http://shailan.com/
 */
@@ -15,7 +15,7 @@ class stf_adsense extends WP_Widget {
 		$this->WP_Widget('stf-adsense', __('Adsense'), $widget_ops);
 		$this->alt_option_name = 'stf_adsense';	
 		
-		$this->version = "1.6";
+		$this->version = "1.6.1";
 		$this->settings_key = "stf_adsense";
 		$this->options_page = "adsense-widget";
 		
@@ -223,7 +223,7 @@ function options_page(){
 		$msg = '';
 		
 		if(empty($adsense_id)){
-			echo "<div class='warning'>Please enter your google ads id in the <a href=\"". get_bloginfo('url') . "/wp-admin/options-general.php?page=adsense-widget\">Adsense Widget Options Panel</a>.</div>";
+			echo "<div class='warning'>Please enter your google ads id in the <a href=\"". get_bloginfo('url') . "/wp-admin/options-general.php?page=adsense-widget\">Adsense Widget Options Panel</a>. (<a href=\"http://shailan.com/wordpress/plugins/adsense-widget/\">Help</a>)</div>";
 
 		} else {
 			
@@ -369,6 +369,33 @@ function options_page(){
 
 add_action('widgets_init', create_function('', 'return register_widget("stf_adsense");'));
 
+// Settings link
+function plugin_add_settings_link($links) {
+    $settings_link = '<a href="options-general.php?page=adsense-widget">Settings</a>';
+    array_push( $links, $settings_link );
+    return $links;
+}
+
+$plugin = plugin_basename(__FILE__);
+add_filter( "plugin_action_links_$plugin", 'plugin_add_settings_link' );
+
+// After activation redirect
+register_activation_hook(__FILE__, 'adsense_widget_activate');
+add_action('admin_init', 'adsense_widget_redirect');
+
+function adsense_widget_activate() {
+    add_option('adsense_widget_do_activation_redirect', true);
+}
+
+function adsense_widget_redirect() {
+    if (get_option('adsense_widget_do_activation_redirect', false)) {
+        delete_option('adsense_widget_do_activation_redirect');
+		$url = admin_url( 'options-general.php?page=adsense-widget' );
+        wp_redirect($url);
+    }
+}
+
+// Shortcode
 function stf_adsense_shortcode($atts, $content = null ){
 	extract(shortcode_atts( array(
 		'align' => 'none',

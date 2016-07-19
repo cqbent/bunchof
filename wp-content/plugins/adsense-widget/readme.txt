@@ -3,8 +3,8 @@ Contributors: mattsay
 Donate link: http://shailan.com/donate
 Tags: adsense, multi-widget, widget
 Requires at least: 2.8
-Tested up to: 3.1.3
-Stable tag: 1.6
+Tested up to: 4.0
+Stable tag: 1.6.1
 
 Simply the best **Adsense Widget**. Select Ad size easily on your site. Hide ads for users, admins. You can change colors easily. You can define Slot & Channel ids for statistics. Easy to use shortcode `[adsense]`! Powered by [Shailan.com](http://shailan.com/).
 
@@ -28,9 +28,17 @@ You can ask your questions [here](http://shailan.com/wordpress/plugins/adsense-w
 
 == Screenshots ==
 
-1. A snapshot of the widget form
+1. A preview of the widget
+1. Adsense Widget General Settings
+1. Adsense Widget Custom Color Settings
 
 == Changelog ==
+
+= 1.6.1 = 
+* Fixed : Minor styling issues with admin page.
+* Added : Settings link to the plugins page.
+* Added : After activation plugin settings redirect.
+* Tested: Up to WP 4.0.
 
 = 1.6 = 
 * Added : CSS Attributes now align ads to the center.

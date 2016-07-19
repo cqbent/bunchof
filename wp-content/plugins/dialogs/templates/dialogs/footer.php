@@ -1,3 +1,0 @@
-	</div> <!-- #dialog -->
-    </body>
-</html>

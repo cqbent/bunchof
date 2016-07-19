@@ -86,7 +86,6 @@ switch ( $field['type'] ) {
 	case 'close': ?>
 
 </div>
-</div>
  
 <?php break;
 	
@@ -168,7 +167,6 @@ case "section":
 <div class="stf_section tab_content" id="<?php echo sanitize_title( $field['name'] ); ?>">
 <!-- <div class="stf_title"><h3><?php echo $field['name']; ?></h3><span class="submit">
 </span><div class="clear"></div></div> -->
-<div class="stf_options">
 
  
 <?php break;
