@@ -537,10 +537,7 @@ button.rtmedia-like {
     display: none; visibility: hidden;
 }
 
-/* hide event image msg */
-#event-image-img {
-    display: none;
-}
+
 .event .event-image {
     width: 40%; margin-bottom: 20px;
 }
