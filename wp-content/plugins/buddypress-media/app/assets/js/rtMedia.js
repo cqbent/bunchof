@@ -695,8 +695,8 @@ function rtm_masonry_reload( el ) {
 		var config = {
 			showChars: 100,
 			ellipsesText: "...",
-			moreText: "more",
-			lessText: "less"
+			moreText: "Read more",
+			lessText: "Show less"
 		};
 
 		if ( settings ) {
@@ -714,9 +714,10 @@ function rtm_masonry_reload( el ) {
 			} else {
 				$this.addClass( 'less' );
 				$this.html( config.lessText );
-			}
-				$this.parent().prev().toggle();
-				$this.prev().toggle();
+				}
+
+				$this.prev().children( '.morecontent' ).toggle();
+				$this.prev().children( '.moreellipses' ).toggle();
 				return false;
 		} }, '.morelink' );
 
@@ -732,7 +733,7 @@ function rtm_masonry_reload( el ) {
 				var h = content.substr( config.showChars, content.length - config.showChars );
 				var html = c + '<span class="moreellipses">' + config.ellipsesText + ' </span><span class="morecontent"><span>' + h + '</span> <a href="#" class="morelink">' + config.moreText + '</a></span>';
 				$this.html( html );
-				$( ".morecontent span" ).hide();
+				$( ".morecontent" ).hide();
 			}
 		} );
 
