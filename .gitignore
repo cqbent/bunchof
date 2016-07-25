@@ -1,3 +1,4 @@
 #ignore config and uploads
 wp-config.php
 wp-content/uploads
+.DS_Store
